@@ -19,7 +19,17 @@ const thoughtController = {
     },
     //get single thought by thought id @ api/thoughts/:id
     async getThoughtById({params}, res){
-        try{}
+        try{
+            const results = await Thought.findOne({_id: params.id})
+            .populate({
+                path: 'reactions',
+                select: '-__v'
+            })
+            .sort( { _id: -1} )
+            .select('-__v');
+
+            res.json(results);
+        }
         catch(err)
         {
             console.log(err);
@@ -88,18 +98,32 @@ const thoughtController = {
             res.status(500).json(err);
         }
     },
-    //create a reaction for a thought
+    //create a reaction for a thought api/thoughts/:thoughtId/reactions
     async createReaction({params, body}, res){
-        try{}
+        try{
+            const results = await Thought.findByIdAndUpdate(
+                { _id: params.thoughtId },
+                { $push: {reactions: body } },
+                {new: true}
+            );
+            res.json(results);
+        }
         catch(err)
         {
             console.log(err);
             res.status(500).json(err);
         }
     },
-    //delete a reaction for a thought
+    //delete a reaction for a thought api/thoughts/:thoughtId/reactions/:reactionId
     async deleteReaction({params}, res){
-        try{}
+        try{
+            const results = await Thought.findByIdAndUpdate(
+                { _id: params.thoughtId },
+                { $pull: {reactions: {reactionId: params.reactionId } } },
+                {new: true}
+            );
+            res.json(results);
+        }
         catch(err)
         {
             console.log(err);
