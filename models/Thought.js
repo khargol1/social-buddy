@@ -44,13 +44,18 @@ const ThoughtSchema = new Schema ({
         type: String,
         required: true
     },
+    userId: {
+        type: String,
+        required: true
+    },
     reactions: [reactionSchema]
 },
 {
     toJSON: {
         virtuals: true,
         getters: true
-    }
+    },
+    id: false
 });
 
 const Thought = model('Thought', ThoughtSchema);

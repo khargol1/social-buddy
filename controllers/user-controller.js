@@ -1,5 +1,5 @@
-const { User } = require('../models');
-const { update } = require('../models/User');
+const { User, Thought } = require('../models');
+
 
 const userController = {
     //get all users
@@ -7,7 +7,7 @@ const userController = {
         try {
             const results = await User.find({})
                 .select('-__v')
-                .sort({ id: -1 });
+                .sort({ _id: -1 }); //display most recent first
 
             res.json(results)
         }
@@ -29,7 +29,7 @@ const userController = {
                 select: '-__v'
             })
             .select('-__v')
-            .sort({id: -1});
+            .sort( {_id: -1 });
 
             res.json(results);
         }
@@ -70,18 +70,46 @@ const userController = {
     async deleteUser({params}, res){
         try{
         const results = await User.findOneAndDelete({_id: params.id});
+        const _ = await Thought.deleteMany({userId: params.id});
         res.json(results);
         }
         catch(err){
             console.log(err);
             res.status(400).json(err);
         }
+    },
+
+    //add a friend /api/users/:userId/friends/:friendId
+    async addFriend ({params}, res){
+        try{
+            let results = await User.findOneAndUpdate(
+                { _id: params.userId},
+                { $push: {friends: params.friendId} },
+                { new: true }
+                );
+            res.json(results);
+        }
+        catch(err){
+            console.log(err);
+            res.status(400).json(err);
+        }
+    },
+
+    //delete a friend
+    async deleteFriend({params}, res){
+        try{
+            let results = await User.findOneAndUpdate(
+                { _id: params.userId },
+                { $pull: {friends: params.friendId} },
+                { new: true }
+                );
+            res.json(results);
+        }
+        catch(err){
+            console.log(err);
+            res.status(400).json(err);
+        }
     }
-    
-
-
-
-
 };
 
 module.exports = userController;
