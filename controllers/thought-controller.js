@@ -28,6 +28,10 @@ const thoughtController = {
             .sort( { _id: -1} )
             .select('-__v');
 
+            if (!results) {
+                res.status(404).json({ message: 'No thought found with that id' });
+                return;
+            }
             res.json(results);
         }
         catch(err)
@@ -68,6 +72,11 @@ const thoughtController = {
     async updateThought({params, body}, res){
         try{
             const results = await Thought.findByIdAndUpdate({_id: params.id}, body, {new: true});
+            
+            if (!results) {
+                res.status(404).json({ message: 'No thought found with that id' });
+                return;
+            }
             res.json(results);
         }
         catch(err)
@@ -83,6 +92,11 @@ const thoughtController = {
             //if I find the thought, i get the user and id it belongs to
             const userInfo = await Thought.findOne({_id: params.id});
             //delete the thought 
+            if(!userInfo){
+                res.status(404).json({message: 'No thought found with that id'});
+                return;
+            }
+            
             const results = await Thought.findOneAndDelete({ _id: params.id});
             const _ = await User.findByIdAndUpdate(
                 { _id: userInfo.userId},
@@ -106,6 +120,11 @@ const thoughtController = {
                 { $push: {reactions: body } },
                 {new: true}
             );
+
+            if (!results) {
+                res.status(404).json({ message: 'No thought found with that id' });
+                return;
+            }
             res.json(results);
         }
         catch(err)
@@ -122,6 +141,11 @@ const thoughtController = {
                 { $pull: {reactions: {reactionId: params.reactionId } } },
                 {new: true}
             );
+
+            if (!results) {
+                res.status(404).json({ message: 'No thought found with that id' });
+                return;
+            }
             res.json(results);
         }
         catch(err)
